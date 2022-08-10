@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Set<Marker> _markers = {};
+  late GoogleMapController googleMapController;
 
   List<Map<String, dynamic>> listLocation = [
     {
@@ -60,6 +61,11 @@ class _HomePageState extends State<HomePage> {
     getDataMarkers();
   }
 
+  moveCamera() {
+    CameraUpdate cameraUpdate = CameraUpdate.newLatLng(latLng);
+    googleMapController.animateCamera(cameraUpdate);
+  }
+
   getDataMarkers() async {
     listLocation.forEach((element) async {
       //   Uint8List bytes = await imageToBytes(element["icon"], fromNetwork: true);
@@ -72,7 +78,7 @@ class _HomePageState extends State<HomePage> {
       //   );
       //   _markers.add(marker);
 
-      imageToBytes(element["icon"], fromNetwork: true).then((value){
+      imageToBytes(element["icon"], fromNetwork: true).then((value) {
         MarkerId markerId = MarkerId(_markers.length.toString());
         Marker marker = Marker(
           markerId: markerId,
@@ -80,7 +86,7 @@ class _HomePageState extends State<HomePage> {
           position: LatLng(element["lat"], element["lon"]),
         );
         _markers.add(marker);
-        setState((){});
+        setState(() {});
       });
     });
   }
@@ -121,37 +127,69 @@ class _HomePageState extends State<HomePage> {
         future: initCurrentPosition(),
         builder: (BuildContext context, AsyncSnapshot snap) {
           if (snap.hasData) {
-            return GoogleMap(
-              initialCameraPosition: snap.data,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              mapType: MapType.normal,
-              compassEnabled: true,
-              onMapCreated: (GoogleMapController controller) {
-                controller.setMapStyle(json.encode(mapStyle));
-              },
-              markers: _markers,
-              onTap: (LatLng position) async {
-                MarkerId markerId = MarkerId(_markers.length.toString());
-                Marker marker = Marker(
-                  markerId: markerId,
-                  // icon: await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/icons/location-icon.png'),
-                  icon: BitmapDescriptor.fromBytes(await imageToBytes(
-                      "assets/icons/place.png",
-                      width: 50,
-                      fromNetwork: false)),
-                  position: position,
-                  rotation: -4,
-                  draggable: true,
-                  onDrag: (LatLng newPosition) {
-                    print(newPosition);
+            return Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: snap.data,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  mapType: MapType.normal,
+                  compassEnabled: true,
+                  onMapCreated: (GoogleMapController googleController) {
+                    // googleController.setMapStyle(json.encode(mapStyle));
+                    googleMapController = googleController;
+                    googleMapController.setMapStyle(json.encode(mapStyle));
                   },
-                );
+                  markers: _markers,
+                  onTap: (LatLng position) async {
+                    MarkerId markerId = MarkerId(_markers.length.toString());
+                    Marker marker = Marker(
+                      markerId: markerId,
+                      // icon: await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/icons/location-icon.png'),
+                      icon: BitmapDescriptor.fromBytes(
+                        await imageToBytes(
+                          "assets/icons/place.png",
+                          width: 50,
+                          fromNetwork: false,
+                        ),
+                      ),
+                      position: position,
+                      rotation: -4,
+                      draggable: true,
+                      onDrag: (LatLng newPosition) {
+                        print(newPosition);
+                      },
+                    );
 
-                _markers.add(marker);
+                    _markers.add(marker);
 
-                setState(() {});
-              },
+                    setState(() {});
+                  },
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: const EdgeInsets.all(14.0),
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        moveCamera();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: const Color(0xfff72585),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.0),
+                        ),
+                      ),
+                      icon: const Icon(Icons.location_on),
+                      label: const Text(
+                        "Mi ubicación",
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           }
           return Center(
