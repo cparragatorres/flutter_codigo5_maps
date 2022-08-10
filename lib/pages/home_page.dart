@@ -61,8 +61,12 @@ class _HomePageState extends State<HomePage> {
     getDataMarkers();
   }
 
-  moveCamera() {
-    CameraUpdate cameraUpdate = CameraUpdate.newLatLng(latLng);
+  moveCamera() async {
+    Position position = await Geolocator.getCurrentPosition();
+
+    CameraUpdate cameraUpdate = CameraUpdate.newLatLng(
+      LatLng(position.latitude, position.longitude),
+    );
     googleMapController.animateCamera(cameraUpdate);
   }
 
