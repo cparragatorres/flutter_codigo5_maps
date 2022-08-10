@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
     _polylines.add(
       Polyline(
         polylineId: PolylineId("ruta_1"),
-        color: Colors.greenAccent,
+        color: Color(0xfff72585),
         width: 5,
         points: _points,
       ),
