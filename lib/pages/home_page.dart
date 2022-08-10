@@ -18,6 +18,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  List<LatLng> _points = [];
+
+
   late GoogleMapController googleMapController;
 
   List<Map<String, dynamic>> listLocation = [
@@ -59,6 +63,7 @@ class _HomePageState extends State<HomePage> {
   initState() {
     super.initState();
     getDataMarkers();
+    currentPosition();
   }
 
   moveCamera() async {
@@ -124,6 +129,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  currentPosition() {
+    _polylines.add(
+      Polyline(
+        polylineId: PolylineId("ruta_1"),
+        color: Colors.greenAccent,
+        width: 5,
+        points: _points,
+      ),
+    );
+
+    Geolocator.getPositionStream().listen((event) {
+      _points.add(LatLng(event.latitude, event.longitude));
+      setState(() {
+
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,6 +168,7 @@ class _HomePageState extends State<HomePage> {
                     googleMapController.setMapStyle(json.encode(mapStyle));
                   },
                   markers: _markers,
+                  polylines: _polylines,
                   onTap: (LatLng position) async {
                     MarkerId markerId = MarkerId(_markers.length.toString());
                     Marker marker = Marker(
@@ -181,7 +205,7 @@ class _HomePageState extends State<HomePage> {
                         moveCamera();
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: const Color(0xfff72585),
+                        primary: const Color(0xff023047),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14.0),
                         ),
