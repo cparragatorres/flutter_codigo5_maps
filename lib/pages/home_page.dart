@@ -21,7 +21,6 @@ class _HomePageState extends State<HomePage> {
   Set<Polyline> _polylines = {};
   List<LatLng> _points = [];
 
-
   late GoogleMapController googleMapController;
 
   List<Map<String, dynamic>> listLocation = [
@@ -140,10 +139,20 @@ class _HomePageState extends State<HomePage> {
     );
 
     Geolocator.getPositionStream().listen((event) {
-      _points.add(LatLng(event.latitude, event.longitude));
-      setState(() {
-
-      });
+      _points.add(
+        LatLng(
+          event.latitude,
+          event.longitude,
+        ),
+      );
+      CameraUpdate cameraUpdate = CameraUpdate.newLatLng(
+        LatLng(
+          event.latitude,
+          event.longitude,
+        ),
+      );
+      googleMapController.animateCamera(cameraUpdate);
+      setState(() {});
     });
   }
 
